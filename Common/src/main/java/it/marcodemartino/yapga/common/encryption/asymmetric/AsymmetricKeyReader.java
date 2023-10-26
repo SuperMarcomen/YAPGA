@@ -1,9 +1,11 @@
 package it.marcodemartino.yapga.common.encryption.asymmetric;
 
+import it.marcodemartino.yapga.common.encryption.symmetric.SymmetricEncryption;
+
 import java.security.KeyPair;
 
 public interface AsymmetricKeyReader {
 
-    KeyPair readKeyPair(String publicName, String privateName);
+    KeyPair readKeyPair(SymmetricEncryption symmetricEncryption);
 
 }

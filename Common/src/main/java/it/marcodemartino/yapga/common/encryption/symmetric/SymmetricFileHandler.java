@@ -35,6 +35,17 @@ public class SymmetricFileHandler implements ISymmetricFileHandler {
     }
 
     @Override
+    public SymmetricKeyContainer readKeyEncrypted(SymmetricEncryption otherEncryption) {
+        try {
+            byte[] fileContent = Files.readAllBytes(getKeyPath());
+            return keyConstructor.constructKeyFromString(otherEncryption.decryptToString(fileContent));
+        } catch (IOException e) {
+            logger.error("There was an error reading the symmetric key from disk", e);
+            return null;
+        }
+    }
+
+    @Override
     public byte[] readSalt() {
         try {
             String fileContent = Files.readString(Paths.get(SALT_FILE_NAME));
@@ -50,6 +61,16 @@ public class SymmetricFileHandler implements ISymmetricFileHandler {
         String fileContent = keyConstructor.keyToString(symmetricKeyContainer);
         try {
             Files.writeString(getKeyPath(), fileContent);
+        } catch (IOException e) {
+            logger.error("There was an error writing the symmetric key to disk", e);
+        }
+    }
+
+    @Override
+    public void writeKeyEncrypted(SymmetricKeyContainer symmetricKeyContainer, SymmetricEncryption otherEncryption) {
+        String fileContent = keyConstructor.keyToString(symmetricKeyContainer);
+        try {
+            Files.write(getKeyPath(), otherEncryption.encryptFromString(fileContent));
         } catch (IOException e) {
             logger.error("There was an error writing the symmetric key to disk", e);
         }

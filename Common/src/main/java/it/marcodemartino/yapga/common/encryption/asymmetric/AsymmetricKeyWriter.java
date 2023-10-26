@@ -1,10 +1,11 @@
 package it.marcodemartino.yapga.common.encryption.asymmetric;
 
-import java.nio.file.Path;
+import it.marcodemartino.yapga.common.encryption.symmetric.SymmetricEncryption;
+
 import java.security.KeyPair;
 
 public interface AsymmetricKeyWriter {
 
-    void writeToFile(KeyPair keyPair, Path path);
+    void writeToFile(KeyPair keyPair, SymmetricEncryption symmetricEncryption);
 
 }
