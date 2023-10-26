@@ -4,4 +4,6 @@ public interface SymmetricKeyReader {
 
     boolean doesKeyExist();
     SymmetricKeyContainer readKey();
+    byte[] readSalt();
+
 }

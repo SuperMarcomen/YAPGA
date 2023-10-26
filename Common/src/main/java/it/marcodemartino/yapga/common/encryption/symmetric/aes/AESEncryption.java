@@ -6,23 +6,28 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.spec.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.Base64;
 
 public class AESEncryption implements SymmetricEncryption {
 
     private static final String ALGORITHM_INSTANCE = "AES/CBC/PKCS5Padding";
+    private final int saltSize;
     private final Logger logger = LogManager.getLogger(AESEncryption.class);
+    private final int keySize;
     private KeyGenerator keyGenerator;
     private SymmetricKeyContainer symmetricKeyContainer;
     private Cipher encryptCipher;
     private Cipher decryptCipher;
 
     public AESEncryption(int keySize) {
-        tryInitKeyGenerator(keySize);
+        this.keySize = keySize;
+        this.saltSize = keySize / 8;
+        tryInitKeyGenerator();
         tryInitCipher();
     }
 
@@ -58,23 +63,46 @@ public class AESEncryption implements SymmetricEncryption {
 
     @Override
     public void generateKey() {
-        byte[] iv = new byte[16];
-        new SecureRandom().nextBytes(iv);
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+        IvParameterSpec ivParameterSpec = generateIv();
         SecretKey secretKey = keyGenerator.generateKey();
         symmetricKeyContainer = new AESSymmetricKeyContainer(secretKey, ivParameterSpec);
+        initCiphers(ivParameterSpec, secretKey);
+    }
 
+    @Override
+    public void generateKeyFromPassword(String password, byte[] salt) {
         try {
-            encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
-            decryptCipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-            logger.error("Could not init the cipher", e);
+            int iterations = 10000;
+            KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterations, keySize);
+
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            byte[] derivedKey = keyFactory.generateSecret(keySpec).getEncoded();
+
+            SecretKey secretKey = new SecretKeySpec(derivedKey, "AES");
+            IvParameterSpec ivParameterSpec = generateIv();
+            symmetricKeyContainer = new AESSymmetricKeyContainer(secretKey, ivParameterSpec);
+            initCiphers(ivParameterSpec, secretKey);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            logger.error("There was an error generating a key from a password", e);
         }
+    }
+
+    @Override
+    public byte[] generateSalt() {
+        byte[] salt = new byte[saltSize];
+        new SecureRandom().nextBytes(salt);
+        return salt;
     }
 
     @Override
     public SymmetricKeyContainer getKey() {
         return symmetricKeyContainer;
+    }
+
+    private IvParameterSpec generateIv() {
+        byte[] iv = new byte[16];
+        new SecureRandom().nextBytes(iv);
+        return new IvParameterSpec(iv);
     }
 
     @Override
@@ -99,6 +127,15 @@ public class AESEncryption implements SymmetricEncryption {
         return encodedKey + System.lineSeparator() + encodedIV;
     }
 
+    private void initCiphers(IvParameterSpec ivParameterSpec, SecretKey secretKey) {
+        try {
+            encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
+            decryptCipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+            logger.error("Could not init the cipher", e);
+        }
+    }
+
     private void tryInitCipher() {
         try {
             encryptCipher = Cipher.getInstance(ALGORITHM_INSTANCE);
@@ -109,7 +146,7 @@ public class AESEncryption implements SymmetricEncryption {
         }
     }
 
-    private void tryInitKeyGenerator(int keySize) {
+    private void tryInitKeyGenerator() {
         try {
             keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(keySize);

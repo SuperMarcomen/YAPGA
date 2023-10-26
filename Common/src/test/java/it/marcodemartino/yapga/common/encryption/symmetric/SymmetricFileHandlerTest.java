@@ -3,12 +3,16 @@ package it.marcodemartino.yapga.common.encryption.symmetric;
 import it.marcodemartino.yapga.common.encryption.symmetric.aes.AESEncryption;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SymmetricFileHandlerTest {
 
     @Test
-    void writeKey() {
+    void writeKey() throws IOException {
+        Files.deleteIfExists(Paths.get("aes_key.pem"));
         SymmetricEncryption symmetricEncryption = new AESEncryption(128);
         symmetricEncryption.generateKey();
         SymmetricKeyContainer keyContainer = symmetricEncryption.getKey();
@@ -19,5 +23,19 @@ class SymmetricFileHandlerTest {
         SymmetricKeyContainer readKey = symmetricFileHandler.readKey();
         assertArrayEquals(keyContainer.getSecretKey().getEncoded(), readKey.getSecretKey().getEncoded());
         assertArrayEquals(keyContainer.getIV().getIV(), readKey.getIV().getIV());
+    }
+
+    @Test
+    void writeSalt() throws IOException {
+        Path saltPath = Paths.get("main_salt.pem");
+        Files.deleteIfExists(saltPath);
+        SymmetricEncryption symmetricEncryption = new AESEncryption(128);
+        byte[] salt = symmetricEncryption.generateSalt();
+        assertFalse(Files.exists(saltPath));
+        ISymmetricFileHandler symmetricFileHandler = new SymmetricFileHandler(symmetricEncryption);
+        symmetricFileHandler.writeSalt(salt);
+        assertTrue(Files.exists(saltPath));
+        byte[] readSalt = symmetricFileHandler.readSalt();
+        assertArrayEquals(salt, readSalt);
     }
 }
