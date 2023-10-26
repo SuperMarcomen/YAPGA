@@ -1,12 +1,13 @@
-package it.marcodemartino.yapga.common.encryption;
+package it.marcodemartino.yapga.common.encryption.asymmetric.rsa;
 
+import it.marcodemartino.yapga.common.encryption.asymmetric.AsymmetricEncryption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.crypto.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.*;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -81,24 +82,45 @@ public class RSAEncryption implements AsymmetricEncryption {
     }
 
     @Override
-    public PublicKey constructKeyFromString(String key) {
+    public PublicKey constructPublicKeyFromString(String key) {
         try {
-            byte[] byteKey = Base64.getDecoder().decode(key.getBytes());
-            X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+            byte[] keyBytes = Base64.getDecoder().decode(key.getBytes());
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
             KeyFactory kf = KeyFactory.getInstance("RSA");
-            return kf.generatePublic(X509publicKey);
-        } catch(Exception e){
+            return kf.generatePublic(spec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             logger.fatal("There was an error reconstructing the key {} from string", key, e);
-            e.printStackTrace();
+         }
+
+        return null;
+    }
+
+    @Override
+    public PrivateKey constructPrivateKeyFromString(String key) {
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(key.getBytes());
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return kf.generatePrivate(spec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            logger.fatal("There was an error reconstructing the key {} from string", key, e);
         }
 
         return null;
     }
 
+    @Override
     public String publicKeyToString(PublicKey publicKey) {
         byte[] encodedKey = publicKey.getEncoded();
         return Base64.getEncoder().encodeToString(encodedKey);
     }
+
+    @Override
+    public String privateKeyToString(PrivateKey privateKey) {
+        byte[] encodedKey = privateKey.getEncoded();
+        return Base64.getEncoder().encodeToString(encodedKey);
+    }
+
 
     @Override
     public byte[][] encryptFromString(String input) {

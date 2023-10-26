@@ -1,4 +1,4 @@
-package it.marcodemartino.yapga.common.encryption;
+package it.marcodemartino.yapga.common.encryption.asymmetric;
 
 import java.security.PublicKey;
 

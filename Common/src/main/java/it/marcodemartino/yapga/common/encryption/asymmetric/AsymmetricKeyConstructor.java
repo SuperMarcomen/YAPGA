@@ -1,4 +1,4 @@
-package it.marcodemartino.yapga.common.encryption;
+package it.marcodemartino.yapga.common.encryption.asymmetric;
 
 import java.security.*;
 
@@ -8,7 +8,9 @@ public interface AsymmetricKeyConstructor {
     PublicKey getPublicKey();
     PrivateKey getPrivateKey();
     void setKeys(KeyPair keyPair);
-    PublicKey constructKeyFromString(String key);
+    PublicKey constructPublicKeyFromString(String key);
+    PrivateKey constructPrivateKeyFromString(String key);
     String publicKeyToString(PublicKey publicKey);
+    String privateKeyToString(PrivateKey publicKey);
 
 }
