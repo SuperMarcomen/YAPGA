@@ -47,12 +47,14 @@ public class AsymmetricKeyFileHandler implements IAsymmetricKeyFileHandler {
     private PublicKey getPublicKey(SymmetricEncryption symmetricEncryption) throws IOException {
         byte[] fileContent = Files.readAllBytes(Paths.get(PUBLIC_KEY_FILE_NAME));
         String decryptedContent = symmetricEncryption.decryptToString(fileContent);
+        if (decryptedContent.isEmpty()) return null;
         return keyConstructor.constructPublicKeyFromString(decryptedContent);
     }
 
     private PrivateKey getPrivateKey(SymmetricEncryption symmetricEncryption) throws IOException {
         byte[] fileContent = Files.readAllBytes(Paths.get(PRIVATE_KEY_FILE_NAME));
         String decryptedContent = symmetricEncryption.decryptToString(fileContent);
+        if (decryptedContent.isEmpty()) return null;
         return keyConstructor.constructPrivateKeyFromString(decryptedContent);
     }
 }
