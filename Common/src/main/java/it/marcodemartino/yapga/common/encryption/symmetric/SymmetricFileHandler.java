@@ -46,6 +46,11 @@ public class SymmetricFileHandler implements ISymmetricFileHandler {
     }
 
     @Override
+    public boolean doesSaltExist() {
+        return Files.exists(Paths.get(SALT_FILE_NAME));
+    }
+
+    @Override
     public byte[] readSalt() {
         try {
             String fileContent = Files.readString(Paths.get(SALT_FILE_NAME));

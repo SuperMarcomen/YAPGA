@@ -6,6 +6,7 @@ import java.security.KeyPair;
 
 public interface AsymmetricKeyReader {
 
+    boolean doKeysExist();
     KeyPair readKeyPair(SymmetricEncryption symmetricEncryption);
 
 }

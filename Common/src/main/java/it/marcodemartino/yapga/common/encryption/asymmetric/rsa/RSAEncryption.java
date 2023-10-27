@@ -75,6 +75,11 @@ public class RSAEncryption implements AsymmetricEncryption {
     }
 
     @Override
+    public KeyPair getKeys() {
+        return new KeyPair(publicKey, privateKey);
+    }
+
+    @Override
     public void setKeys(KeyPair keyPair) {
         publicKey = keyPair.getPublic();
         privateKey = keyPair.getPrivate();

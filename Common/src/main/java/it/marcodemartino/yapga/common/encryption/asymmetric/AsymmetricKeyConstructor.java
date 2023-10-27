@@ -7,6 +7,7 @@ public interface AsymmetricKeyConstructor {
     void generateKeyPair();
     PublicKey getPublicKey();
     PrivateKey getPrivateKey();
+    KeyPair getKeys();
     void setKeys(KeyPair keyPair);
     PublicKey constructPublicKeyFromString(String key);
     PrivateKey constructPrivateKeyFromString(String key);

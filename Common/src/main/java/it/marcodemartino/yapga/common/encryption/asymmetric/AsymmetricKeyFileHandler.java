@@ -20,6 +20,11 @@ public class AsymmetricKeyFileHandler implements IAsymmetricKeyFileHandler {
     }
 
     @Override
+    public boolean doKeysExist() {
+        return Files.exists(Paths.get(PUBLIC_KEY_FILE_NAME)) && Files.exists(Paths.get(PRIVATE_KEY_FILE_NAME));
+    }
+
+    @Override
     public KeyPair readKeyPair(SymmetricEncryption symmetricEncryption) {
         try {
             PublicKey publicKey = getPublicKey(symmetricEncryption);

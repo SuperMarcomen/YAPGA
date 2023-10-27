@@ -113,6 +113,7 @@ public class AESEncryption implements SymmetricEncryption {
     @Override
     public SymmetricKeyContainer constructKeyFromString(String key) {
         String[] args = key.split(System.lineSeparator());
+        if (args.length != 2) return null;
         byte[] keyBytes = Base64.getDecoder().decode(args[0]);
         byte[] ivBytes = Base64.getDecoder().decode(args[1]);
         SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
