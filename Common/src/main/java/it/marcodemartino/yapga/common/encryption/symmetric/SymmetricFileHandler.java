@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.Base64;
+import java.util.*;
 
 public class SymmetricFileHandler implements ISymmetricFileHandler {
 
@@ -51,10 +51,14 @@ public class SymmetricFileHandler implements ISymmetricFileHandler {
     }
 
     @Override
-    public byte[] readSalt() {
+    public byte[][] readSaltAndIv() {
         try {
-            String fileContent = Files.readString(Paths.get(SALT_FILE_NAME));
-            return Base64.getDecoder().decode(fileContent);
+            List<String> fileContent = Files.readAllLines(Paths.get(SALT_FILE_NAME));
+            byte[][] saltAndIv = new byte[2][];
+            for (int i = 0; i < saltAndIv.length; i++) {
+                saltAndIv[i] = Base64.getDecoder().decode(fileContent.get(i));
+            }
+            return saltAndIv;
         } catch (IOException e) {
             logger.error("There was an error reading the salt from disk", e);
             return null;
@@ -82,8 +86,12 @@ public class SymmetricFileHandler implements ISymmetricFileHandler {
     }
 
     @Override
-    public void writeSalt(byte[] salt) {
-        String fileContent = Base64.getEncoder().encodeToString(salt);
+    public void writeSaltAndIv(byte[][] saltAndIv) {
+        List<String> lines = new ArrayList<>();
+        for (byte[] bytes : saltAndIv) {
+            lines.add(Base64.getEncoder().encodeToString(bytes));
+        }
+        String fileContent = String.join(System.lineSeparator(), lines);
         try {
             Files.writeString(Paths.get(SALT_FILE_NAME), fileContent);
         } catch (IOException e) {

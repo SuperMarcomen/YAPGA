@@ -71,6 +71,11 @@ public class AESEncryption implements SymmetricEncryption {
 
     @Override
     public void generateKeyFromPassword(String password, byte[] salt) {
+        generateKeyFromPassword(password, salt, generateIv().getIV());
+    }
+
+    @Override
+    public void generateKeyFromPassword(String password, byte[] salt, byte[] iv) {
         try {
             int iterations = 10000;
             KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterations, keySize);
@@ -78,8 +83,8 @@ public class AESEncryption implements SymmetricEncryption {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
             byte[] derivedKey = keyFactory.generateSecret(keySpec).getEncoded();
 
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
             SecretKey secretKey = new SecretKeySpec(derivedKey, "AES");
-            IvParameterSpec ivParameterSpec = generateIv();
             symmetricKeyContainer = new AESSymmetricKeyContainer(secretKey, ivParameterSpec);
             initCiphers(ivParameterSpec, secretKey);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -88,7 +93,14 @@ public class AESEncryption implements SymmetricEncryption {
     }
 
     @Override
-    public byte[] generateSalt() {
+    public byte[][] generateSaltAndIv() {
+        byte[][] saltAndIv = new byte[2][];
+        saltAndIv[0] = generateSalt();
+        saltAndIv[1] = generateIv().getIV();
+        return saltAndIv;
+    }
+
+    private byte[] generateSalt() {
         byte[] salt = new byte[saltSize];
         new SecureRandom().nextBytes(salt);
         return salt;

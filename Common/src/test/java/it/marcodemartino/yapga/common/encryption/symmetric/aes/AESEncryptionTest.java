@@ -3,9 +3,7 @@ package it.marcodemartino.yapga.common.encryption.symmetric.aes;
 import it.marcodemartino.yapga.common.encryption.symmetric.SymmetricEncryption;
 import org.junit.jupiter.api.Test;
 
-import java.security.SecureRandom;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AESEncryptionTest {
 
@@ -22,11 +20,11 @@ class AESEncryptionTest {
     @Test
     void generateKeyFromPassword() {
         SymmetricEncryption aesEncryption = new AESEncryption(128);
-        byte[] salt = new byte[8];
-        new SecureRandom().nextBytes(salt);
-        aesEncryption.generateKeyFromPassword("123Sorella!", salt);
+        byte[][] saltAndIv = aesEncryption.generateSaltAndIv();
+        aesEncryption.generateKeyFromPassword("123Sorella!", saltAndIv[0], saltAndIv[1]);
         String input = "Sono un ragazzo molto bello";
         byte[] encryptedInput = aesEncryption.encryptFromString(input);
+        aesEncryption.generateKeyFromPassword("123Sorella!", saltAndIv[0], saltAndIv[1]);
         String decryptedInput = aesEncryption.decryptToString(encryptedInput);
         assertEquals(input, decryptedInput);
     }

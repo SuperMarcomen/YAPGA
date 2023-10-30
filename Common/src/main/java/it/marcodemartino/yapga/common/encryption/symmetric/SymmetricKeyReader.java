@@ -6,6 +6,6 @@ public interface SymmetricKeyReader {
     SymmetricKeyContainer readKey();
     SymmetricKeyContainer readKeyEncrypted(SymmetricEncryption otherEncryption);
     boolean doesSaltExist();
-    byte[] readSalt();
+    byte[][] readSaltAndIv();
 
 }

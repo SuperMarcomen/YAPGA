@@ -49,12 +49,12 @@ class SymmetricFileHandlerTest {
         Path saltPath = Paths.get("main_salt.pem");
         Files.deleteIfExists(saltPath);
         SymmetricEncryption symmetricEncryption = new AESEncryption(128);
-        byte[] salt = symmetricEncryption.generateSalt();
+        byte[][] salt = symmetricEncryption.generateSaltAndIv();
         assertFalse(Files.exists(saltPath));
         ISymmetricFileHandler symmetricFileHandler = new SymmetricFileHandler(symmetricEncryption);
-        symmetricFileHandler.writeSalt(salt);
+        symmetricFileHandler.writeSaltAndIv(salt);
         assertTrue(Files.exists(saltPath));
-        byte[] readSalt = symmetricFileHandler.readSalt();
+        byte[][] readSalt = symmetricFileHandler.readSaltAndIv();
         assertArrayEquals(salt, readSalt);
     }
 }

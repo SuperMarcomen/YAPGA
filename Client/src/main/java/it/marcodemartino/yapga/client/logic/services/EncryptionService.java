@@ -1,8 +1,10 @@
 package it.marcodemartino.yapga.client.logic.services;
 
+import com.google.gson.Gson;
 import it.marcodemartino.yapga.common.encryption.asymmetric.*;
 import it.marcodemartino.yapga.common.encryption.symmetric.*;
 import it.marcodemartino.yapga.common.encryption.symmetric.aes.AESEncryption;
+import it.marcodemartino.yapga.common.json.*;
 
 import java.security.KeyPair;
 
@@ -11,20 +13,29 @@ public class EncryptionService {
     private final AsymmetricEncryption localSignature;
     private final AsymmetricEncryption remoteEncryption;
     private final SymmetricEncryption localEncryption;
+    private final Gson gson;
 
     public EncryptionService(AsymmetricEncryption localSignature, AsymmetricEncryption remoteEncryption, SymmetricEncryption localEncryption) {
         this.localSignature = localSignature;
         this.remoteEncryption = remoteEncryption;
         this.localEncryption = localEncryption;
+        this.gson = GsonInstance.get();
+    }
+
+    public JSONObject encryptAndSignMessage(JSONObject object) {
+        String jsonOfObject = gson.toJson(object);
+        byte[][] encryptedJson = remoteEncryption.encryptFromString(jsonOfObject);
+        byte[][] signature = localSignature.signFromString(jsonOfObject);
+        return new EncryptedSignedMessage(encryptedJson, signature);
     }
 
     public boolean inputMainPasswordAndInit(String password) {
         ISymmetricFileHandler symmetricFileHandler = new SymmetricFileHandler(localEncryption);
         SymmetricEncryption keysDecrypter = new AESEncryption(128);
 
-        byte[] salt = readOrGenerateSalt(symmetricFileHandler);
+        byte[][] saltAndIv = readOrGenerateSaltAndIv(symmetricFileHandler);
 
-        keysDecrypter.generateKeyFromPassword(password, salt);
+        keysDecrypter.generateKeyFromPassword(password, saltAndIv[0], saltAndIv[1]);
         IAsymmetricKeyFileHandler asymmetricKeyFileHandler = new AsymmetricKeyFileHandler(localSignature);
 
         KeyPair localAsymmetricKeys = null;
@@ -62,14 +73,18 @@ public class EncryptionService {
         return true;
     }
 
-    private byte[] readOrGenerateSalt(ISymmetricFileHandler symmetricFileHandler) {
-        byte[] salt;
+    public String getLocalPublicKeyAsString() {
+        return localSignature.publicKeyToString(localSignature.getPublicKey());
+    }
+
+    private byte[][] readOrGenerateSaltAndIv(ISymmetricFileHandler symmetricFileHandler) {
+        byte[][] saltAndIv;
         if (symmetricFileHandler.doesSaltExist()) {
-            salt = symmetricFileHandler.readSalt();
+            saltAndIv = symmetricFileHandler.readSaltAndIv();
         } else {
-            salt = localEncryption.generateSalt();
-            symmetricFileHandler.writeSalt(salt);
+            saltAndIv = localEncryption.generateSaltAndIv();
+            symmetricFileHandler.writeSaltAndIv(saltAndIv);
         }
-        return salt;
+        return saltAndIv;
     }
 }
