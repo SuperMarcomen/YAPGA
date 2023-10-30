@@ -3,6 +3,9 @@ package it.marcodemartino.yapga.server.handler;
 import it.marcodemartino.yapga.common.application.Application;
 import it.marcodemartino.yapga.common.application.ApplicationIO;
 import it.marcodemartino.yapga.common.commands.JsonCommandManager;
+import it.marcodemartino.yapga.common.json.JSONMethods;
+import it.marcodemartino.yapga.server.commands.SendPublicKeyCommand;
+import it.marcodemartino.yapga.server.services.EncryptionService;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -12,11 +15,12 @@ public class ClientHandler implements Application {
     private final Socket socket;
     private final ApplicationIO applicationIO;
 
-    public ClientHandler(Socket socket) throws IOException {
+    public ClientHandler(Socket socket, EncryptionService encryptionService) throws IOException {
         this.socket = socket;
         this.applicationIO = new ClientHandlerIO(socket.getInputStream(), socket.getOutputStream());
 
         JsonCommandManager commandManager = new JsonCommandManager();
+        commandManager.registerCommand(JSONMethods.REQUEST_REMOTE_PUBLIC_KEY, new SendPublicKeyCommand(applicationIO, encryptionService));
         this.applicationIO.registerInputListener(commandManager);
     }
 

@@ -1,12 +1,16 @@
 package it.marcodemartino.yapga.common.json;
 
-public class EncryptedSignedMessage implements JSONObject {
+import it.marcodemartino.yapga.common.certificates.IdentityCertificate;
+
+public class EncryptedSignedMessageObject implements JSONObject {
 
     private final JSONMethods method = JSONMethods.ENCRYPTED_SIGNED_MESSAGE;
+    private final IdentityCertificate identityCertificate;
     private final byte[][] encryptedMessage;
     private final byte[][] signature;
 
-    public EncryptedSignedMessage(byte[][] encryptedMessage, byte[][] signature) {
+    public EncryptedSignedMessageObject(IdentityCertificate identityCertificate, byte[][] encryptedMessage, byte[][] signature) {
+        this.identityCertificate = identityCertificate;
         this.encryptedMessage = encryptedMessage;
         this.signature = signature;
     }
@@ -22,5 +26,9 @@ public class EncryptedSignedMessage implements JSONObject {
 
     public byte[][] getSignature() {
         return signature;
+    }
+
+    public IdentityCertificate getIdentityCertificate() {
+        return identityCertificate;
     }
 }

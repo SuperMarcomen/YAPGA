@@ -1,6 +1,7 @@
 package it.marcodemartino.yapga.client.logic.services;
 
 import com.google.gson.Gson;
+import it.marcodemartino.yapga.common.certificates.IdentityCertificate;
 import it.marcodemartino.yapga.common.encryption.asymmetric.*;
 import it.marcodemartino.yapga.common.encryption.symmetric.*;
 import it.marcodemartino.yapga.common.encryption.symmetric.aes.AESEncryption;
@@ -14,6 +15,7 @@ public class EncryptionService {
     private final AsymmetricEncryption remoteEncryption;
     private final SymmetricEncryption localEncryption;
     private final Gson gson;
+    private IdentityCertificate identityCertificate;
 
     public EncryptionService(AsymmetricEncryption localSignature, AsymmetricEncryption remoteEncryption, SymmetricEncryption localEncryption) {
         this.localSignature = localSignature;
@@ -26,7 +28,7 @@ public class EncryptionService {
         String jsonOfObject = gson.toJson(object);
         byte[][] encryptedJson = remoteEncryption.encryptFromString(jsonOfObject);
         byte[][] signature = localSignature.signFromString(jsonOfObject);
-        return new EncryptedSignedMessage(encryptedJson, signature);
+        return new EncryptedSignedMessageObject(identityCertificate, encryptedJson, signature);
     }
 
     public boolean inputMainPasswordAndInit(String password) {
@@ -73,6 +75,10 @@ public class EncryptionService {
         return true;
     }
 
+    public void setRemotePublicKey(String publicKey) {
+        remoteEncryption.setKeys(new KeyPair(localSignature.constructPublicKeyFromString(publicKey), null));
+    }
+
     public String getLocalPublicKeyAsString() {
         return localSignature.publicKeyToString(localSignature.getPublicKey());
     }
@@ -86,5 +92,9 @@ public class EncryptionService {
             symmetricFileHandler.writeSaltAndIv(saltAndIv);
         }
         return saltAndIv;
+    }
+
+    public void setIdentityCertificate(IdentityCertificate identityCertificate) {
+        this.identityCertificate = identityCertificate;
     }
 }

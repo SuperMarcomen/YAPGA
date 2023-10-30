@@ -1,8 +1,8 @@
 package it.marcodemartino.yapga.client.logic.services;
 
-import it.marcodemartino.yapga.client.logic.actions.Action;
-import it.marcodemartino.yapga.client.logic.actions.RequestIdentityCertificate;
+import it.marcodemartino.yapga.client.logic.actions.*;
 import it.marcodemartino.yapga.client.logic.certificates.CertificateReaderWriter;
+import it.marcodemartino.yapga.common.certificates.IdentityCertificate;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
 
 public class AuthenticationService {
@@ -19,8 +19,11 @@ public class AuthenticationService {
 
     public void login() {
         if (!certificateReaderWriter.doesCertificateExist()) {
-            Action action = new RequestIdentityCertificate(outputEmitter, encryptionService, encryptionService.getLocalPublicKeyAsString());
+            Action action = new RequestIdentityCertificate(outputEmitter, encryptionService.getLocalPublicKeyAsString());
             action.execute();
+        } else {
+            IdentityCertificate identityCertificate = certificateReaderWriter.readCertificate();
+            encryptionService.setIdentityCertificate(identityCertificate);
         }
     }
 }

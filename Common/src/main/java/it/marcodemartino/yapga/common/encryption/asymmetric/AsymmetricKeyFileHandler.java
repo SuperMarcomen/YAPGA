@@ -36,6 +36,17 @@ public class AsymmetricKeyFileHandler implements IAsymmetricKeyFileHandler {
     }
 
     @Override
+    public KeyPair readKeyPair() {
+        try {
+            PublicKey publicKey = getPublicKey();
+            PrivateKey privateKey = getPrivateKey();
+            return new KeyPair(publicKey, privateKey);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    @Override
     public void writeToFile(KeyPair keyPair, SymmetricEncryption symmetricEncryption) {
         String publicText = keyConstructor.publicKeyToString(keyPair.getPublic());
         byte[] encryptedPublic = symmetricEncryption.encryptFromString(publicText);
@@ -44,6 +55,18 @@ public class AsymmetricKeyFileHandler implements IAsymmetricKeyFileHandler {
         try {
             Files.write(Paths.get(PUBLIC_KEY_FILE_NAME), encryptedPublic);
             Files.write(Paths.get(PRIVATE_KEY_FILE_NAME), encryptedPrivate);
+        } catch (IOException e) {
+            logger.error("There was an error writing the rsa keys to file", e);
+        }
+    }
+
+    @Override
+    public void writeToFile(KeyPair keyPair) {
+        String publicText = keyConstructor.publicKeyToString(keyPair.getPublic());
+        String privateText = keyConstructor.privateKeyToString(keyPair.getPrivate());
+        try {
+            Files.writeString(Paths.get(PUBLIC_KEY_FILE_NAME), publicText);
+            Files.writeString(Paths.get(PRIVATE_KEY_FILE_NAME), privateText);
         } catch (IOException e) {
             logger.error("There was an error writing the rsa keys to file", e);
         }
@@ -61,5 +84,15 @@ public class AsymmetricKeyFileHandler implements IAsymmetricKeyFileHandler {
         String decryptedContent = symmetricEncryption.decryptToString(fileContent);
         if (decryptedContent.isEmpty()) return null;
         return keyConstructor.constructPrivateKeyFromString(decryptedContent);
+    }
+
+    private PublicKey getPublicKey() throws IOException {
+        String fileContent = Files.readString(Paths.get(PUBLIC_KEY_FILE_NAME));
+        return keyConstructor.constructPublicKeyFromString(fileContent);
+    }
+
+    private PrivateKey getPrivateKey() throws IOException {
+        String fileContent = Files.readString(Paths.get(PRIVATE_KEY_FILE_NAME));
+        return keyConstructor.constructPrivateKeyFromString(fileContent);
     }
 }
