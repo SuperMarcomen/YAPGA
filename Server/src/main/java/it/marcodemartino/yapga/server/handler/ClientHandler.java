@@ -21,10 +21,11 @@ public class ClientHandler implements Application {
         this.socket = socket;
         this.applicationIO = new ClientHandlerIO(socket.getInputStream(), socket.getOutputStream());
 
-        JsonCommandManager commandManager = new JsonCommandManager(getInputStream());
+        JsonCommandManager commandManager = new JsonCommandManager();
         commandManager.registerCommand(JSONMethods.REQUEST_REMOTE_PUBLIC_KEY, new SendPublicKeyCommand(applicationIO, encryptionService));
         commandManager.registerCommand(JSONMethods.REQUEST_IDENTITY_CERTIFICATE, new SendIdentityCertificateCommand(applicationIO, encryptionService, certificatesService));
         commandManager.registerCommand(JSONMethods.ENCRYPTED_MESSAGE, new EncryptedMessageCommand(applicationIO.getEventManager(), encryptionService));
+        commandManager.registerCommand(JSONMethods.SEND_IMAGE, new ReceiveImageCommand(getInputStream()));
         this.applicationIO.registerInputListener(commandManager);
     }
 
