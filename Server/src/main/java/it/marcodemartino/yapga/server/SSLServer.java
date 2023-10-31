@@ -4,6 +4,7 @@ import it.marcodemartino.yapga.common.application.Application;
 import it.marcodemartino.yapga.common.encryption.asymmetric.*;
 import it.marcodemartino.yapga.common.encryption.asymmetric.rsa.RSAEncryption;
 import it.marcodemartino.yapga.server.handler.ClientHandler;
+import it.marcodemartino.yapga.server.services.CertificatesService;
 import it.marcodemartino.yapga.server.services.EncryptionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +57,7 @@ public class SSLServer implements Server {
         IAsymmetricKeyFileHandler asymmetricKeyFileHandler = new AsymmetricKeyFileHandler(localEncryption);
         EncryptionService encryptionService = new EncryptionService(localEncryption, remoteEncryption, asymmetricKeyFileHandler);
         encryptionService.loadKeys();
-
+        CertificatesService certificatesService = new CertificatesService(encryptionService.getLocalEncryption());
 
         while (running) {
             if (serverSocket.isClosed()) return;
@@ -64,7 +65,7 @@ public class SSLServer implements Server {
             if (clientSocket == null) return;
 
             logger.info("Received a connection with IP: {}", clientSocket.getInetAddress());
-            Application clientHandler = new ClientHandler(clientSocket, encryptionService);
+            Application clientHandler = new ClientHandler(clientSocket, encryptionService, certificatesService);
             new Thread(clientHandler).start();
         }
     }

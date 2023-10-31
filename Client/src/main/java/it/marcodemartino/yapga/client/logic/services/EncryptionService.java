@@ -7,6 +7,7 @@ import it.marcodemartino.yapga.common.encryption.symmetric.*;
 import it.marcodemartino.yapga.common.encryption.symmetric.aes.AESEncryption;
 import it.marcodemartino.yapga.common.json.*;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 
 public class EncryptionService {
@@ -24,11 +25,25 @@ public class EncryptionService {
         this.gson = GsonInstance.get();
     }
 
-    public JSONObject encryptAndSignMessage(JSONObject object) {
+    public boolean verifyIdentityCertificate(IdentityCertificate identityCertificate) {
+        String json = gson.toJson(identityCertificate.getUser());
+        return verifyRemoteSignature(identityCertificate.getSignature(), json);
+    }
+
+    public boolean verifyRemoteSignature(byte[][] toBeChecked, String shouldBe) {
+        return remoteEncryption.checkSignature(toBeChecked, shouldBe.getBytes(StandardCharsets.UTF_8), remoteEncryption.getPublicKey());
+    }
+    public JSONObject encryptSignAndCertifySignMessage(JSONObject object) {
         String jsonOfObject = gson.toJson(object);
         byte[][] encryptedJson = remoteEncryption.encryptFromString(jsonOfObject);
         byte[][] signature = localSignature.signFromString(jsonOfObject);
-        return new EncryptedSignedMessageObject(identityCertificate, encryptedJson, signature);
+        return new EncryptedSignedCertifiedMessageObject(identityCertificate, encryptedJson, signature);
+    }
+
+    public JSONObject encryptMessage(JSONObject object) {
+        String jsonOfObject = gson.toJson(object);
+        byte[][] encryptedJson = remoteEncryption.encryptFromString(jsonOfObject);
+        return new EncryptedMessageObject(encryptedJson);
     }
 
     public boolean inputMainPasswordAndInit(String password) {
@@ -83,6 +98,10 @@ public class EncryptionService {
         return localSignature.publicKeyToString(localSignature.getPublicKey());
     }
 
+    public SymmetricEncryption getLocalEncryption() {
+        return localEncryption;
+    }
+
     private byte[][] readOrGenerateSaltAndIv(ISymmetricFileHandler symmetricFileHandler) {
         byte[][] saltAndIv;
         if (symmetricFileHandler.doesSaltExist()) {
@@ -92,6 +111,10 @@ public class EncryptionService {
             symmetricFileHandler.writeSaltAndIv(saltAndIv);
         }
         return saltAndIv;
+    }
+
+    public String decryptMessage(byte[][] encryptedMessage) {
+        return localSignature.decryptToString(encryptedMessage);
     }
 
     public void setIdentityCertificate(IdentityCertificate identityCertificate) {

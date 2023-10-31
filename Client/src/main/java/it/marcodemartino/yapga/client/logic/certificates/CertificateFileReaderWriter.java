@@ -2,6 +2,7 @@ package it.marcodemartino.yapga.client.logic.certificates;
 
 import com.google.gson.Gson;
 import it.marcodemartino.yapga.common.certificates.IdentityCertificate;
+import it.marcodemartino.yapga.common.encryption.symmetric.SymmetricEncryption;
 import it.marcodemartino.yapga.common.json.GsonInstance;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +28,17 @@ public class CertificateFileReaderWriter implements CertificateReaderWriter {
     public IdentityCertificate readCertificate() {
         String base64Json = tryReadCertificate();
         if (base64Json.isEmpty()) return null;
+        return constructCertificate(base64Json);
+    }
+
+    @Override
+    public IdentityCertificate readCertificate(SymmetricEncryption symmetricEncryption) {
+        String encryptedBase64Json = tryReadCertificate();
+        if (encryptedBase64Json.isEmpty()) return null;
+        return constructCertificate(symmetricEncryption.decryptToString(encryptedBase64Json.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private IdentityCertificate constructCertificate(String base64Json) {
         byte[] jsonBytes = Base64.getDecoder().decode(base64Json.getBytes(StandardCharsets.UTF_8));
         String json = new String(jsonBytes, StandardCharsets.UTF_8);
         IdentityCertificate identityCertificate = gson.fromJson(json, IdentityCertificate.class);
@@ -53,6 +65,14 @@ public class CertificateFileReaderWriter implements CertificateReaderWriter {
         String json = gson.toJson(identityCertificate);
         String base64JSon = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
         tryWriteCertificate(base64JSon);
+    }
+
+    @Override
+    public void writeCertificate(IdentityCertificate identityCertificate, SymmetricEncryption symmetricEncryption) {
+        String json = gson.toJson(identityCertificate);
+        String decryptedBase64Json = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+        String encryptedBase64Json = new String(symmetricEncryption.encryptFromString(decryptedBase64Json), StandardCharsets.UTF_8);
+        tryWriteCertificate(encryptedBase64Json);
     }
 
     private void tryWriteCertificate(String base64JSon) {

@@ -19,7 +19,7 @@ public class AuthenticationService {
 
     public void login() {
         if (!certificateReaderWriter.doesCertificateExist()) {
-            Action action = new RequestIdentityCertificate(outputEmitter, encryptionService.getLocalPublicKeyAsString());
+            Action action = new RequestIdentityCertificate(outputEmitter, encryptionService, encryptionService.getLocalPublicKeyAsString());
             action.execute();
         } else {
             IdentityCertificate identityCertificate = certificateReaderWriter.readCertificate();

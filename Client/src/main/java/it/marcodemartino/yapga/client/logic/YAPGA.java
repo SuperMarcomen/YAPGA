@@ -4,11 +4,10 @@ import it.marcodemartino.yapga.client.logic.actions.Action;
 import it.marcodemartino.yapga.client.logic.actions.RequestRemotePublicKey;
 import it.marcodemartino.yapga.client.logic.certificates.CertificateFileReaderWriter;
 import it.marcodemartino.yapga.client.logic.certificates.CertificateReaderWriter;
-import it.marcodemartino.yapga.client.logic.commands.ReceiveRemotePublicKeyCommand;
+import it.marcodemartino.yapga.client.logic.commands.*;
 import it.marcodemartino.yapga.client.logic.results.Result;
 import it.marcodemartino.yapga.client.logic.results.ResultBroadcaster;
-import it.marcodemartino.yapga.client.logic.services.AuthenticationService;
-import it.marcodemartino.yapga.client.logic.services.EncryptionService;
+import it.marcodemartino.yapga.client.logic.services.*;
 import it.marcodemartino.yapga.client.logic.socket.SSLSocketClient;
 import it.marcodemartino.yapga.client.ui.UIStarter;
 import it.marcodemartino.yapga.client.ui.YAPGAUI;
@@ -39,10 +38,13 @@ public class YAPGA {
         CertificateReaderWriter certificateReaderWriter = new CertificateFileReaderWriter(Paths.get(""));
         ResultBroadcaster resultBroadcaster = new ResultBroadcaster();
         AuthenticationService authenticationService = new AuthenticationService(client.getIO(), certificateReaderWriter, encryptionService);
+        CertificatesService certificatesService = new CertificatesService(certificateReaderWriter, encryptionService.getLocalEncryption());
         resultBroadcaster.registerListener(Result.CORRECT_MAIN_PASSWORD, authenticationService::login);
 
         JsonCommandManager commandManager = new JsonCommandManager();
         commandManager.registerCommand(JSONMethods.SEND_REMOTE_PUBLIC_KEY, new ReceiveRemotePublicKeyCommand(encryptionService));
+        commandManager.registerCommand(JSONMethods.ENCRYPTED_MESSAGE, new EncryptedMessageCommand(client.getIO().getEventManager(), encryptionService));
+        commandManager.registerCommand(JSONMethods.SEND_IDENTITY_CERTIFICATE, new ReceiveIdentityCertificate(encryptionService, certificatesService));
         client.getIO().registerInputListener(commandManager);
 
         Action action = new RequestRemotePublicKey(client.getIO());

@@ -120,6 +120,7 @@ public class AESEncryption implements SymmetricEncryption {
     @Override
     public void setKey(SymmetricKeyContainer secretKey) {
         this.symmetricKeyContainer = secretKey;
+        initCiphers(secretKey.getIV(), secretKey.getSecretKey());
     }
 
     @Override
