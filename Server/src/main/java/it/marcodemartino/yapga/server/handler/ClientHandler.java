@@ -9,6 +9,7 @@ import it.marcodemartino.yapga.server.services.CertificatesService;
 import it.marcodemartino.yapga.server.services.EncryptionService;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 
 public class ClientHandler implements Application {
@@ -20,11 +21,20 @@ public class ClientHandler implements Application {
         this.socket = socket;
         this.applicationIO = new ClientHandlerIO(socket.getInputStream(), socket.getOutputStream());
 
-        JsonCommandManager commandManager = new JsonCommandManager();
+        JsonCommandManager commandManager = new JsonCommandManager(getInputStream());
         commandManager.registerCommand(JSONMethods.REQUEST_REMOTE_PUBLIC_KEY, new SendPublicKeyCommand(applicationIO, encryptionService));
         commandManager.registerCommand(JSONMethods.REQUEST_IDENTITY_CERTIFICATE, new SendIdentityCertificateCommand(applicationIO, encryptionService, certificatesService));
         commandManager.registerCommand(JSONMethods.ENCRYPTED_MESSAGE, new EncryptedMessageCommand(applicationIO.getEventManager(), encryptionService));
         this.applicationIO.registerInputListener(commandManager);
+    }
+
+    @Override
+    public InputStream getInputStream() {
+        try {
+            return socket.getInputStream();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     @Override

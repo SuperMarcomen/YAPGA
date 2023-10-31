@@ -43,7 +43,7 @@ public class YAPGA {
         ResultBroadcaster resultBroadcaster = new ResultBroadcaster();
         resultBroadcaster.registerListener(Result.CORRECT_MAIN_PASSWORD, authenticationService::login);
 
-        JsonCommandManager commandManager = new JsonCommandManager();
+        JsonCommandManager commandManager = new JsonCommandManager(client.getInputStream());
         commandManager.registerCommand(JSONMethods.SEND_REMOTE_PUBLIC_KEY, new ReceiveRemotePublicKeyCommand(encryptionService));
         commandManager.registerCommand(JSONMethods.ENCRYPTED_MESSAGE, new EncryptedMessageCommand(client.getIO().getEventManager(), encryptionService));
         commandManager.registerCommand(JSONMethods.SEND_IDENTITY_CERTIFICATE, new ReceiveIdentityCertificate(encryptionService, certificatesService));
@@ -55,6 +55,8 @@ public class YAPGA {
         Runnable runnable = new UIStarter();
         YAPGAUI.setResultBroadcaster(resultBroadcaster);
         YAPGAUI.setEncryptionService(encryptionService);
+        YAPGAUI.setImageService(new ImageService());
+        YAPGAUI.setOutputEmitter(client.getIO());
         Thread uiThread = new Thread(runnable);
         uiThread.start();
     }

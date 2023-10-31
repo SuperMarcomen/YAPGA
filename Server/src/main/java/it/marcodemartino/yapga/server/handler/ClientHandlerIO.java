@@ -16,6 +16,7 @@ public class ClientHandlerIO implements ApplicationIO {
     private final Logger logger = LogManager.getLogger(ClientHandlerIO.class);
     private final BufferedReader in;
     private final PrintWriter out;
+    private final OutputStream rawOut;
     private final EventManager eventManager;
     private final Gson gson;
     private boolean running;
@@ -23,6 +24,7 @@ public class ClientHandlerIO implements ApplicationIO {
     public ClientHandlerIO(InputStream inputStream, OutputStream outputStream) {
         this.in = new BufferedReader(new InputStreamReader(inputStream));
         this.out = new PrintWriter(outputStream, true);
+        rawOut = outputStream;
         eventManager = new EventManager();
         gson = GsonInstance.get();
         running = true;
@@ -32,6 +34,15 @@ public class ClientHandlerIO implements ApplicationIO {
     public void sendOutput(JSONObject object) {
         String output = gson.toJson(object);
         out.println(output);
+    }
+
+    @Override
+    public void sendRaw(byte[] bytes, int position, int length) {
+        try {
+            rawOut.write(bytes, position, length);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

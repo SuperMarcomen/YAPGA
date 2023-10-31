@@ -18,12 +18,14 @@ public class SocketIO implements ApplicationIO {
     private final EventManager eventManager;
     private final BufferedReader in;
     private final PrintWriter out;
+    private final OutputStream rawOut;
     private final Gson gson;
     private boolean running;
 
     public SocketIO(InputStream inputStream, OutputStream outputStream) {
         this.in = new BufferedReader(new InputStreamReader(inputStream));
         this.out = new PrintWriter(outputStream, true);
+        this.rawOut = outputStream;
         this.eventManager = new EventManager();
         this.gson = GsonInstance.get();
         this.running = true;
@@ -51,6 +53,15 @@ public class SocketIO implements ApplicationIO {
     public void sendOutput(JSONObject object) {
         String output = gson.toJson(object);
         out.println(output);
+    }
+
+    @Override
+    public void sendRaw(byte[] bytes, int position, int length) {
+        try {
+            rawOut.write(bytes, position, length);
+        } catch (IOException e) {
+            logger.warn("There was an error sending raw data to the server", e);
+        }
     }
 
     @Override

@@ -7,8 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.*;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.UnknownHostException;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -49,6 +48,15 @@ public class SSLSocketClient implements Application {
             socket.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public InputStream getInputStream() {
+        try {
+            return socket.getInputStream();
+        } catch (IOException e) {
+            return null;
         }
     }
 
