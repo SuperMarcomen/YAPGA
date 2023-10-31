@@ -3,8 +3,7 @@ package it.marcodemartino.yapga.client.ui;
 
 import it.marcodemartino.yapga.client.logic.results.ResultBroadcaster;
 import it.marcodemartino.yapga.client.logic.services.EncryptionService;
-import it.marcodemartino.yapga.client.ui.scenes.EnterMainPasswordScene;
-import it.marcodemartino.yapga.client.ui.scenes.ScenesSwitcher;
+import it.marcodemartino.yapga.client.ui.scenes.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -27,8 +26,9 @@ public class YAPGAUI extends Application {
         Scene scene = new Scene(hBox, 1500, 800);
 
 
-        ScenesSwitcher scenesSwitcher = new ScenesSwitcher();
+        ScenesSwitcher scenesSwitcher = new ScenesSwitcher(resultBroadcaster);
         scenesSwitcher.addScreen("main_password", new EnterMainPasswordScene(resultBroadcaster, encryptionService));
+        scenesSwitcher.addScreen("gallery", new GalleryScene());
         scenesSwitcher.setMain(scene);
         scenesSwitcher.switchScreen("main_password");
 

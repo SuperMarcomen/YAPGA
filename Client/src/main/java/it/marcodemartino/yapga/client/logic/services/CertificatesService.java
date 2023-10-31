@@ -16,10 +16,11 @@ public class CertificatesService {
     public CertificatesService(CertificateReaderWriter certificateReaderWriter, SymmetricEncryption symmetricEncryption) {
         this.certificateReaderWriter = certificateReaderWriter;
         this.symmetricEncryption = symmetricEncryption;
-        if (certificateReaderWriter.doesCertificateExist()) {
-            logger.info("Found a certificate. Reading it");
-            identityCertificate = certificateReaderWriter.readCertificate(symmetricEncryption);
-        }
+    }
+
+    public void readCertificate() {
+        logger.info("Reading a certificate");
+        this.identityCertificate = certificateReaderWriter.readCertificate(symmetricEncryption);
     }
 
     public void writeCertificate(IdentityCertificate identityCertificate) {
@@ -29,7 +30,7 @@ public class CertificatesService {
     }
 
     public boolean doesCertificateExist() {
-        return identityCertificate != null;
+        return certificateReaderWriter.doesCertificateExist();
     }
 
     public IdentityCertificate getIdentityCertificate() {

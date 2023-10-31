@@ -34,11 +34,13 @@ public class YAPGA {
         AsymmetricEncryption localSignature = new RSAEncryption(2048);
         AsymmetricEncryption remoteEncryption = new RSAEncryption(2048);
         SymmetricEncryption localEncryption = new AESEncryption(128);
+
         EncryptionService encryptionService = new EncryptionService(localSignature, remoteEncryption, localEncryption);
         CertificateReaderWriter certificateReaderWriter = new CertificateFileReaderWriter(Paths.get(""));
-        ResultBroadcaster resultBroadcaster = new ResultBroadcaster();
-        AuthenticationService authenticationService = new AuthenticationService(client.getIO(), certificateReaderWriter, encryptionService);
         CertificatesService certificatesService = new CertificatesService(certificateReaderWriter, encryptionService.getLocalEncryption());
+        AuthenticationService authenticationService = new AuthenticationService(client.getIO(), encryptionService, certificatesService);
+
+        ResultBroadcaster resultBroadcaster = new ResultBroadcaster();
         resultBroadcaster.registerListener(Result.CORRECT_MAIN_PASSWORD, authenticationService::login);
 
         JsonCommandManager commandManager = new JsonCommandManager();

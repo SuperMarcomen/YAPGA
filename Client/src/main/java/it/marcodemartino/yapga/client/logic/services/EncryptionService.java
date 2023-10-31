@@ -16,7 +16,6 @@ public class EncryptionService {
     private final AsymmetricEncryption remoteEncryption;
     private final SymmetricEncryption localEncryption;
     private final Gson gson;
-    private IdentityCertificate identityCertificate;
 
     public EncryptionService(AsymmetricEncryption localSignature, AsymmetricEncryption remoteEncryption, SymmetricEncryption localEncryption) {
         this.localSignature = localSignature;
@@ -33,7 +32,7 @@ public class EncryptionService {
     public boolean verifyRemoteSignature(byte[][] toBeChecked, String shouldBe) {
         return remoteEncryption.checkSignature(toBeChecked, shouldBe.getBytes(StandardCharsets.UTF_8), remoteEncryption.getPublicKey());
     }
-    public JSONObject encryptSignAndCertifySignMessage(JSONObject object) {
+    public JSONObject encryptSignAndCertifySignMessage(JSONObject object, IdentityCertificate identityCertificate) {
         String jsonOfObject = gson.toJson(object);
         byte[][] encryptedJson = remoteEncryption.encryptFromString(jsonOfObject);
         byte[][] signature = localSignature.signFromString(jsonOfObject);
@@ -117,7 +116,4 @@ public class EncryptionService {
         return localSignature.decryptToString(encryptedMessage);
     }
 
-    public void setIdentityCertificate(IdentityCertificate identityCertificate) {
-        this.identityCertificate = identityCertificate;
-    }
 }
