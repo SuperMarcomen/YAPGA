@@ -5,6 +5,8 @@ import it.marcodemartino.yapga.client.logic.actions.RequestRemotePublicKey;
 import it.marcodemartino.yapga.client.logic.certificates.CertificateFileReaderWriter;
 import it.marcodemartino.yapga.client.logic.certificates.CertificateReaderWriter;
 import it.marcodemartino.yapga.client.logic.commands.*;
+import it.marcodemartino.yapga.client.logic.images.ImageResizer;
+import it.marcodemartino.yapga.client.logic.images.STDImageResizer;
 import it.marcodemartino.yapga.client.logic.results.Result;
 import it.marcodemartino.yapga.client.logic.results.ResultBroadcaster;
 import it.marcodemartino.yapga.client.logic.services.*;
@@ -52,10 +54,12 @@ public class YAPGA {
         Action action = new RequestRemotePublicKey(client.getIO());
         action.execute();
 
+        ImageResizer imageResizer = new STDImageResizer();
+
         Runnable runnable = new UIStarter();
         YAPGAUI.setResultBroadcaster(resultBroadcaster);
         YAPGAUI.setEncryptionService(encryptionService);
-        YAPGAUI.setImageService(new ImageService());
+        YAPGAUI.setImageService(new ImageService(imageResizer, client.getIO(), encryptionService));
         YAPGAUI.setOutputEmitter(client.getIO());
         Thread uiThread = new Thread(runnable);
         uiThread.start();
