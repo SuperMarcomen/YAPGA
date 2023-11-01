@@ -1,4 +1,4 @@
-package it.marcodemartino.yapga.client.logic.services;
+package it.marcodemartino.yapga.client.logic.certificates;
 
 import com.google.gson.Gson;
 import it.marcodemartino.yapga.common.certificates.IdentityCertificate;
@@ -10,14 +10,14 @@ import it.marcodemartino.yapga.common.json.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 
-public class EncryptionService {
+public class EncryptionService2 {
 
     private final AsymmetricEncryption localSignature;
     private final AsymmetricEncryption remoteEncryption;
     private final SymmetricEncryption localEncryption;
     private final Gson gson;
 
-    public EncryptionService(AsymmetricEncryption localSignature, AsymmetricEncryption remoteEncryption, SymmetricEncryption localEncryption) {
+    public EncryptionService2(AsymmetricEncryption localSignature, AsymmetricEncryption remoteEncryption, SymmetricEncryption localEncryption) {
         this.localSignature = localSignature;
         this.remoteEncryption = remoteEncryption;
         this.localEncryption = localEncryption;

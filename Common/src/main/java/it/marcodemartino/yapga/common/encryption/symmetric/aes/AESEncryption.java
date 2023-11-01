@@ -56,7 +56,7 @@ public class AESEncryption implements SymmetricEncryption {
         try {
             return decryptCipher.doFinal(input);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            logger.error("There was an error while decrypting the input");
+            logger.error("There was an error while decrypting the input", e);
             return new byte[0];
         }
     }

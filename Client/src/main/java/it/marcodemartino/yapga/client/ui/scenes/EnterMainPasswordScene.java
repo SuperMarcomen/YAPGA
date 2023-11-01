@@ -4,7 +4,7 @@ import it.marcodemartino.yapga.client.logic.actions.Action;
 import it.marcodemartino.yapga.client.logic.actions.InputMainPassword;
 import it.marcodemartino.yapga.client.logic.results.Result;
 import it.marcodemartino.yapga.client.logic.results.ResultBroadcaster;
-import it.marcodemartino.yapga.client.logic.services.EncryptionService;
+import it.marcodemartino.yapga.common.services.EncryptionService;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;

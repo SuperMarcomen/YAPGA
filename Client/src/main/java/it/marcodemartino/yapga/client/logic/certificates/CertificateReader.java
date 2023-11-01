@@ -5,7 +5,6 @@ import it.marcodemartino.yapga.common.encryption.symmetric.SymmetricEncryption;
 
 public interface CertificateReader {
 
-    IdentityCertificate readCertificate();
     IdentityCertificate readCertificate(SymmetricEncryption symmetricEncryption);
 
 

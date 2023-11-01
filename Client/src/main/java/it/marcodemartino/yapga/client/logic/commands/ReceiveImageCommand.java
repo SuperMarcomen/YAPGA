@@ -1,7 +1,9 @@
-package it.marcodemartino.yapga.server.commands;
+package it.marcodemartino.yapga.client.logic.commands;
 
+import it.marcodemartino.yapga.client.logic.services.GalleryService;
 import it.marcodemartino.yapga.common.commands.JsonCommand;
 import it.marcodemartino.yapga.common.json.SendImageObject;
+import javafx.application.Platform;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,16 +16,19 @@ public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
 
     private final Logger logger = LogManager.getLogger(ReceiveImageCommand.class);
     private final InputStream inputStream;
+    private final GalleryService galleryService;
 
-    public ReceiveImageCommand(InputStream inputStream) {
+    public ReceiveImageCommand(InputStream inputStream, GalleryService galleryService) {
         super(SendImageObject.class);
         this.inputStream = inputStream;
+        this.galleryService = galleryService;
     }
 
     @Override
     protected void execute(SendImageObject sendImageObject) {
         logger.info("Received the image {}", sendImageObject.getFileName());
         byte[] pictureBytes = readPictureBytes((int) sendImageObject.getFileSize());
+        Platform.runLater(() -> galleryService.addImageFromBytes(pictureBytes));
 
         try {
             String senderUUID = sendImageObject.getSenderUUID().toString();

@@ -5,10 +5,12 @@ import it.marcodemartino.yapga.common.commands.JsonCommand;
 import it.marcodemartino.yapga.common.entities.User;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
 import it.marcodemartino.yapga.common.json.*;
+import it.marcodemartino.yapga.common.services.EncryptionService;
 import it.marcodemartino.yapga.server.services.CertificatesService;
-import it.marcodemartino.yapga.server.services.EncryptionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.UUID;
 
 public class SendIdentityCertificateCommand extends JsonCommand<RequestIdentityCertificateObject> {
 
@@ -27,9 +29,9 @@ public class SendIdentityCertificateCommand extends JsonCommand<RequestIdentityC
     @Override
     protected void execute(RequestIdentityCertificateObject requestIdentityCertificateObject) {
         logger.info("Sending identity certificate to a user");
-        User user = new User(requestIdentityCertificateObject.getPublicKey());
+        User user = new User(UUID.randomUUID(), requestIdentityCertificateObject.getPublicKey());
         IdentityCertificate identityCertificate = certificatesService.generateCertificate(user);
         JSONObject object = new SendIdentityCerificateObject(identityCertificate);
-        outputEmitter.sendOutput(encryptionService.encryptWithKeyAndSign(user.getPublicKey(), object));
+        outputEmitter.sendOutput(encryptionService.encryptMessageWithKey(user.getPublicKey(), object));
     }
 }

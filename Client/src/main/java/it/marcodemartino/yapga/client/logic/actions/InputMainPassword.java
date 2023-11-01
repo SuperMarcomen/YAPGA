@@ -2,7 +2,7 @@ package it.marcodemartino.yapga.client.logic.actions;
 
 import it.marcodemartino.yapga.client.logic.results.Result;
 import it.marcodemartino.yapga.client.logic.results.ResultBroadcaster;
-import it.marcodemartino.yapga.client.logic.services.EncryptionService;
+import it.marcodemartino.yapga.common.services.EncryptionService;
 
 public class InputMainPassword implements Action {
 

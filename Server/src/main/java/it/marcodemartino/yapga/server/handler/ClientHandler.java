@@ -3,10 +3,12 @@ package it.marcodemartino.yapga.server.handler;
 import it.marcodemartino.yapga.common.application.Application;
 import it.marcodemartino.yapga.common.application.ApplicationIO;
 import it.marcodemartino.yapga.common.commands.JsonCommandManager;
+import it.marcodemartino.yapga.common.images.STDImageResizer;
 import it.marcodemartino.yapga.common.json.JSONMethods;
+import it.marcodemartino.yapga.common.services.EncryptionService;
+import it.marcodemartino.yapga.common.services.ImageService;
 import it.marcodemartino.yapga.server.commands.*;
 import it.marcodemartino.yapga.server.services.CertificatesService;
-import it.marcodemartino.yapga.server.services.EncryptionService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +28,7 @@ public class ClientHandler implements Application {
         commandManager.registerCommand(JSONMethods.REQUEST_IDENTITY_CERTIFICATE, new SendIdentityCertificateCommand(applicationIO, encryptionService, certificatesService));
         commandManager.registerCommand(JSONMethods.ENCRYPTED_MESSAGE, new EncryptedMessageCommand(applicationIO.getEventManager(), encryptionService));
         commandManager.registerCommand(JSONMethods.SEND_IMAGE, new ReceiveImageCommand(getInputStream()));
+        commandManager.registerCommand(JSONMethods.REQUEST_IMAGES, new SendImagesCommand(new ImageService(new STDImageResizer(), applicationIO, encryptionService)));
         this.applicationIO.registerInputListener(commandManager);
     }
 

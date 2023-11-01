@@ -3,6 +3,7 @@ package it.marcodemartino.yapga.client.logic.services;
 import it.marcodemartino.yapga.client.logic.actions.Action;
 import it.marcodemartino.yapga.client.logic.actions.RequestIdentityCertificate;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
+import it.marcodemartino.yapga.common.services.EncryptionService;
 
 public class AuthenticationService {
 

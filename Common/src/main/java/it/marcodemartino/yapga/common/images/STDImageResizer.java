@@ -1,4 +1,4 @@
-package it.marcodemartino.yapga.client.logic.images;
+package it.marcodemartino.yapga.common.images;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;

@@ -1,10 +1,10 @@
 package it.marcodemartino.yapga.client.logic.commands;
 
 import it.marcodemartino.yapga.client.logic.services.CertificatesService;
-import it.marcodemartino.yapga.client.logic.services.EncryptionService;
 import it.marcodemartino.yapga.common.certificates.IdentityCertificate;
 import it.marcodemartino.yapga.common.commands.JsonCommand;
 import it.marcodemartino.yapga.common.json.SendIdentityCerificateObject;
+import it.marcodemartino.yapga.common.services.EncryptionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

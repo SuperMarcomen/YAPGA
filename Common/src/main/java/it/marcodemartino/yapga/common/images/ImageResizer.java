@@ -1,4 +1,4 @@
-package it.marcodemartino.yapga.client.logic.images;
+package it.marcodemartino.yapga.common.images;
 
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;

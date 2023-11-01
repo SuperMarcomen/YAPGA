@@ -2,10 +2,12 @@ package it.marcodemartino.yapga.client.ui;
 
 
 import it.marcodemartino.yapga.client.logic.results.ResultBroadcaster;
-import it.marcodemartino.yapga.client.logic.services.EncryptionService;
-import it.marcodemartino.yapga.client.logic.services.ImageService;
+import it.marcodemartino.yapga.client.logic.services.CertificatesService;
+import it.marcodemartino.yapga.client.logic.services.GalleryService;
 import it.marcodemartino.yapga.client.ui.scenes.*;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
+import it.marcodemartino.yapga.common.services.EncryptionService;
+import it.marcodemartino.yapga.common.services.ImageService;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -18,6 +20,8 @@ public class YAPGAUI extends Application {
     private static ResultBroadcaster resultBroadcaster;
     private static EncryptionService encryptionService;
     private static ImageService imageService;
+    private static CertificatesService certificatesService;
+    private static GalleryService galleryService;
 
     public static void main(String[] args) {
         launch(args);
@@ -32,7 +36,7 @@ public class YAPGAUI extends Application {
 
         ScenesSwitcher scenesSwitcher = new ScenesSwitcher(resultBroadcaster);
         scenesSwitcher.addScreen("main_password", new EnterMainPasswordScene(resultBroadcaster, encryptionService));
-        scenesSwitcher.addScreen("gallery", new GalleryScene(outputEmitter, imageService));
+        scenesSwitcher.addScreen("gallery", new GalleryScene(outputEmitter, certificatesService, imageService, galleryService));
         scenesSwitcher.setMain(scene);
         scenesSwitcher.switchScreen("main_password");
 
@@ -55,5 +59,13 @@ public class YAPGAUI extends Application {
 
     public static void setImageService(ImageService imageService) {
         YAPGAUI.imageService = imageService;
+    }
+
+    public static void setCertificatesService(CertificatesService certificatesService) {
+        YAPGAUI.certificatesService = certificatesService;
+    }
+
+    public static void setGalleryService(GalleryService galleryService) {
+        YAPGAUI.galleryService = galleryService;
     }
 }

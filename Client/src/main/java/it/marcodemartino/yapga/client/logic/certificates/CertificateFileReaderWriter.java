@@ -25,17 +25,10 @@ public class CertificateFileReaderWriter implements CertificateReaderWriter {
     }
 
     @Override
-    public IdentityCertificate readCertificate() {
-        String base64Json = tryReadCertificate();
-        if (base64Json.isEmpty()) return null;
-        return constructCertificate(base64Json);
-    }
-
-    @Override
     public IdentityCertificate readCertificate(SymmetricEncryption symmetricEncryption) {
-        String encryptedBase64Json = tryReadCertificate();
-        if (encryptedBase64Json.isEmpty()) return null;
-        return constructCertificate(symmetricEncryption.decryptToString(encryptedBase64Json.getBytes(StandardCharsets.UTF_8)));
+        byte[] certificateBytes = tryReadCertificate();
+        String decryptedString = symmetricEncryption.decryptToString(certificateBytes);
+        return constructCertificate(decryptedString);
     }
 
     private IdentityCertificate constructCertificate(String base64Json) {
@@ -46,13 +39,13 @@ public class CertificateFileReaderWriter implements CertificateReaderWriter {
         return identityCertificate;
     }
 
-    private String tryReadCertificate() {
+    private byte[] tryReadCertificate() {
         try {
-             return Files.readString(certificatePath);
+            return Files.readAllBytes(certificatePath);
         } catch (IOException e) {
             logger.error("There was an error trying to read the certificate!", e);
         }
-        return "";
+        return new byte[0];
     }
 
     @Override
@@ -61,23 +54,15 @@ public class CertificateFileReaderWriter implements CertificateReaderWriter {
     }
 
     @Override
-    public void writeCertificate(IdentityCertificate identityCertificate) {
-        String json = gson.toJson(identityCertificate);
-        String base64JSon = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
-        tryWriteCertificate(base64JSon);
-    }
-
-    @Override
     public void writeCertificate(IdentityCertificate identityCertificate, SymmetricEncryption symmetricEncryption) {
         String json = gson.toJson(identityCertificate);
         String decryptedBase64Json = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
-        String encryptedBase64Json = new String(symmetricEncryption.encryptFromString(decryptedBase64Json), StandardCharsets.UTF_8);
-        tryWriteCertificate(encryptedBase64Json);
+        tryWriteCertificate(symmetricEncryption.encryptFromString(decryptedBase64Json));
     }
 
-    private void tryWriteCertificate(String base64JSon) {
+    private void tryWriteCertificate(byte[] base64Json) {
         try {
-            Files.writeString(certificatePath, base64JSon);
+            Files.write(certificatePath, base64Json);
         } catch (IOException e) {
             logger.error("There was an error writing the certificate to file!", e);
         }

@@ -3,7 +3,7 @@ package it.marcodemartino.yapga.server.commands;
 import it.marcodemartino.yapga.common.commands.JsonCommand;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
 import it.marcodemartino.yapga.common.json.*;
-import it.marcodemartino.yapga.server.services.EncryptionService;
+import it.marcodemartino.yapga.common.services.EncryptionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
