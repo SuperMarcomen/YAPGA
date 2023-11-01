@@ -3,6 +3,7 @@ package it.marcodemartino.yapga.client.logic.actions;
 import it.marcodemartino.yapga.client.logic.services.CertificatesService;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
 import it.marcodemartino.yapga.common.services.ImageService;
+import javafx.scene.control.ProgressBar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,17 +18,23 @@ public class SendImageAction implements Action {
     private final CertificatesService certificatesService;
     private final Path path;
     private final Consumer<Double> consumer;
+    private final ProgressBar progressBar;
 
-    public SendImageAction(OutputEmitter outputEmitter, ImageService imageService, CertificatesService certificatesService, Path path, Consumer<Double> consumer) {
+    public SendImageAction(OutputEmitter outputEmitter, ImageService imageService, CertificatesService certificatesService, Path path, Consumer<Double> consumer, ProgressBar progressBar) {
         this.outputEmitter = outputEmitter;
         this.imageService = imageService;
         this.certificatesService = certificatesService;
         this.path = path;
         this.consumer = consumer;
+        this.progressBar = progressBar;
     }
 
     @Override
     public void execute() {
         imageService.sendImage(path, certificatesService.getIdentityCertificate().getUser().getUuid(), consumer);
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
     }
 }

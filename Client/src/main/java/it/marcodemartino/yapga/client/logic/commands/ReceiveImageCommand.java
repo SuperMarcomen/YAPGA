@@ -9,8 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
 
@@ -28,15 +26,8 @@ public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
     protected void execute(SendImageObject sendImageObject) {
         logger.info("Received the image {}", sendImageObject.getFileName());
         byte[] pictureBytes = readPictureBytes((int) sendImageObject.getFileSize());
-        Platform.runLater(() -> galleryService.addImageFromBytes(pictureBytes));
 
-        try {
-            String senderUUID = sendImageObject.getSenderUUID().toString();
-            Files.createDirectories(Paths.get(senderUUID));
-            Files.write(Paths.get(senderUUID, sendImageObject.getFileName()), pictureBytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Platform.runLater(() -> galleryService.addImageFromBytes(pictureBytes));
     }
 
     private byte[] readPictureBytes(int fileSize) {

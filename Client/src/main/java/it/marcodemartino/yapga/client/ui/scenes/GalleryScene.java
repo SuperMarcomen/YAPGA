@@ -6,23 +6,27 @@ import it.marcodemartino.yapga.client.logic.services.CertificatesService;
 import it.marcodemartino.yapga.client.logic.services.GalleryService;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
 import it.marcodemartino.yapga.common.services.ImageService;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Paths;
+import java.util.concurrent.*;
 
 public class GalleryScene extends StackPane {
 
     private final OutputEmitter outputEmitter;
     private final ImageService imageService;
     private final GalleryService galleryService;
+
 
     public GalleryScene(OutputEmitter outputEmitter, CertificatesService certificatesService, ImageService imageService, GalleryService galleryService) {
         this.outputEmitter = outputEmitter;
@@ -37,14 +41,13 @@ public class GalleryScene extends StackPane {
         dragTarget.getChildren().addAll(label, dropped, grid);
 
         // Define the number of rows and columns in the grid
-        int numRows = 4; // You can change this as needed
-        int numCols = 4; // You can change this as needed
+        int numRows = 9; // You can change this as needed
+        int numCols = 9; // You can change this as needed
 
 
         getChildren().addAll(dragTarget);
 
         galleryService.registerListeners(image -> {
-            System.out.println("called");
             ImageView imageView = createImageView(image);
             insertImageInGrid(grid, imageView, numRows, numCols);
         });
@@ -57,13 +60,27 @@ public class GalleryScene extends StackPane {
             event.consume();
         });
 
+
+// Define a blocking queue to store image send requests.
+
+        BlockingQueue<File> imageQueue = new LinkedBlockingQueue<>();
+
         dragTarget.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
+            event.consume();
             if (db.hasFiles()) {
                 dropped.setText(db.getFiles().toString());
+                imageQueue.addAll(db.getFiles());
+            }
+        });
 
-                // Get the image file
-                for (File file : db.getFiles()) {
+
+// Create a separate thread to process the image send requests.
+        Thread sendImageThread = new Thread(() -> {
+            while (true) {
+                try {
+                    File file = imageQueue.take();
+                    System.out.println("Started processing " + file.getName());
 
                     // Create a progress bar
                     ProgressBar progressBar = new ProgressBar(0);
@@ -71,7 +88,7 @@ public class GalleryScene extends StackPane {
                     progressBar.setMaxWidth(150);
 
                     // Create an ImageView for the image
-                    Image image = new Image(file.toURI().toString());
+                    Image image = convertToFxImage(imageService.scaleImage(Paths.get(file.getAbsolutePath())));
                     ImageView imageView = createImageView(image);
 
                     // Create a VBox to hold the image and progress bar
@@ -80,13 +97,39 @@ public class GalleryScene extends StackPane {
                     imageBox.getChildren().addAll(imageView, progressBar);
 
                     // Add the image and progress bar to the grid
-                    insertImageInGrid(grid, imageBox, numRows, numCols);
+                    Platform.runLater(() -> insertImageInGrid(grid, imageBox, numRows, numCols));
 
-                    // Perform the upload action in the background
-                    Action action = new SendImageAction(outputEmitter, imageService, certificatesService, file.toPath(), progressBar::setProgress);
+                    Action action = new SendImageAction(outputEmitter, imageService, certificatesService, file.toPath(), progress -> {
+                        Platform.runLater(() -> {
+                            progressBar.setProgress(progress);
+                            if (progress == 1.0) {
+                                progressBar.setVisible(false);
+                            }
+                        });
+                    }, progressBar);
                     action.execute();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-        }});
+            }
+        });
+
+        sendImageThread.start(); // Start the thread
+    }
+
+    private Image convertToFxImage(BufferedImage image) {
+        WritableImage wr = null;
+        if (image != null) {
+            wr = new WritableImage(image.getWidth(), image.getHeight());
+            PixelWriter pw = wr.getPixelWriter();
+            for (int x = 0; x < image.getWidth(); x++) {
+                for (int y = 0; y < image.getHeight(); y++) {
+                    pw.setArgb(x, y, image.getRGB(x, y));
+                }
+            }
+        }
+
+        return new ImageView(wr).getImage();
     }
 
 
