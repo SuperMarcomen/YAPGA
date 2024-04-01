@@ -59,3 +59,7 @@
 .active_side_menu_button {
     -fx-background-color: #5F5CE1;
 }
+
+.error_text {
+    -fx-text-fill: #d00101;
+}

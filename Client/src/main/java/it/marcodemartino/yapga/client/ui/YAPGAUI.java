@@ -38,7 +38,7 @@ public class YAPGAUI extends Application {
 
         ScenesSwitcher scenesSwitcher = new ScenesSwitcher(resultBroadcaster);
         scenesSwitcher.addScreen("main_password", new EnterMainPasswordScene(resultBroadcaster, encryptionService));
-        scenesSwitcher.addScreen("gallery", new GalleryScene(scene.widthProperty(), scene.heightProperty(), scenesSwitcher, outputEmitter, certificatesService, imageService, galleryService));
+        scenesSwitcher.addScreen("gallery", new GalleryScene(scene.widthProperty(), scene.heightProperty(), scenesSwitcher, certificatesService, imageService, galleryService));
         scenesSwitcher.addScreen("albums", new AlbumScene(scene.widthProperty(), scene.heightProperty(), scenesSwitcher));
         scenesSwitcher.setMain(scene);
         scenesSwitcher.switchScreen("main_password");

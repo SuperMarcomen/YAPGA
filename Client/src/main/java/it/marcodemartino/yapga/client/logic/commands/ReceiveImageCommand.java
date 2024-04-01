@@ -30,9 +30,7 @@ public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
         logger.info("Received the image {}", sendImageObject.getFileName());
         byte[] pictureBytes = readPictureBytes((int) sendImageObject.getFileSize());
 
-        Platform.runLater(() -> {
-                galleryService.addImageFromBytes(encryptionService.decryptBytes(pictureBytes));
-        });
+        Platform.runLater(() -> galleryService.addImageFromBytes(encryptionService.decryptBytes(pictureBytes)));
     }
 
     private byte[] readPictureBytes(int fileSize) {
@@ -50,12 +48,6 @@ public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                // Handle error if needed
-            }
         }
 
         return pictureData.toByteArray();
