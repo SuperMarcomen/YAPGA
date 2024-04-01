@@ -4,9 +4,11 @@ import it.marcodemartino.yapga.client.logic.actions.Action;
 import it.marcodemartino.yapga.client.logic.actions.SendImageAction;
 import it.marcodemartino.yapga.client.logic.services.CertificatesService;
 import it.marcodemartino.yapga.client.logic.services.GalleryService;
+import it.marcodemartino.yapga.client.ui.scenes.elements.SideMenu;
 import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
 import it.marcodemartino.yapga.common.services.ImageService;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -25,15 +27,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class GalleryScene extends StackPane {
 
-    private final OutputEmitter outputEmitter;
-    private final ImageService imageService;
-    private final GalleryService galleryService;
 
-
-    public GalleryScene(OutputEmitter outputEmitter, CertificatesService certificatesService, ImageService imageService, GalleryService galleryService) {
-        this.outputEmitter = outputEmitter;
-        this.imageService = imageService;
-        this.galleryService = galleryService;
+    public GalleryScene(ReadOnlyDoubleProperty widthProp, ReadOnlyDoubleProperty heightProp, ScenesSwitcher scenesSwitcher, OutputEmitter outputEmitter, CertificatesService certificatesService, ImageService imageService, GalleryService galleryService) {
+        prefWidthProperty().bind(widthProp);
+        prefHeightProperty().bind(heightProp);
         Label label = new Label("Drag a file to me.");
         Label dropped = new Label("");
         VBox dragTarget = new VBox();
@@ -46,8 +43,12 @@ public class GalleryScene extends StackPane {
         int numRows = 9; // You can change this as needed
         int numCols = 9; // You can change this as needed
 
+        VBox sideMenu = new SideMenu(true, false, scenesSwitcher, prefWidthProperty());
 
-        getChildren().addAll(dragTarget);
+        HBox container = new HBox(sideMenu, dragTarget);
+        container.setSpacing(20);
+
+        getChildren().addAll(container);
 
         galleryService.registerListeners(image -> {
             ImageView imageView = createImageView(image);

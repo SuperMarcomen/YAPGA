@@ -1,8 +1,11 @@
+.text{
+    -fx-font-smoothing-type: gray;
+}
+
 #logo {
     -fx-font-family: nexus;
     -fx-font-size: 80;
     -fx-font-weight: bold;
-    -fx-stroke-width: 10;
 }
 
 #password_input {
@@ -20,7 +23,7 @@
 
 #login_button {
     -fx-background-color: #1A1A1A;
-    -fx-text-fill: white;
+    -fx-text-fill: #EEEEEE;
     -fx-font-weight: bold;
     -fx-font-size: 20;
 }
@@ -29,3 +32,30 @@
     -fx-text-fill: #585858;
 }
 
+#gallery_side_menu {
+    -fx-background-color: #1A1A1A;
+    -fx-padding: 20 0 20 0;
+}
+
+#gallery_logo {
+    -fx-font-family: nexus;
+    -fx-font-size: 80;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5F5CE1;
+}
+
+.side_menu_button {
+    -fx-background-radius: 0 50 50 0;
+    -fx-background-color: transparent;
+    -fx-padding: 16;
+    -fx-text-fill: #EEEEEE;
+    -fx-font-weight: bold;
+    -fx-graphic-text-gap: 20.0;
+    -fx-font-size: 16;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.active_side_menu_button {
+    -fx-background-color: #5F5CE1;
+}
