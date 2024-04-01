@@ -12,6 +12,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class YAPGAUI extends Application {
@@ -32,7 +33,8 @@ public class YAPGAUI extends Application {
         Label label = new Label("Hi");
         HBox hBox = new HBox(label);
         Scene scene = new Scene(hBox, 1500, 800);
-
+        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        Font.loadFont(getClass().getResourceAsStream("/nexus.ttf"), 24);
 
         ScenesSwitcher scenesSwitcher = new ScenesSwitcher(resultBroadcaster);
         scenesSwitcher.addScreen("main_password", new EnterMainPasswordScene(resultBroadcaster, encryptionService));
@@ -43,6 +45,12 @@ public class YAPGAUI extends Application {
         primaryStage.setTitle("Cards against humanity");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        System.exit(0);
     }
 
     public static void setOutputEmitter(OutputEmitter outputEmitter) {

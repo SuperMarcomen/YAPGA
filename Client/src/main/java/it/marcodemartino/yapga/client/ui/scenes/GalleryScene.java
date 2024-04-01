@@ -18,8 +18,10 @@ import javafx.scene.layout.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.nio.file.Paths;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class GalleryScene extends StackPane {
 
@@ -78,6 +80,7 @@ public class GalleryScene extends StackPane {
 // Create a separate thread to process the image send requests.
         Thread sendImageThread = new Thread(() -> {
             while (true) {
+                List<Action> actions = new ArrayList<>();
                 try {
                     File file = imageQueue.take();
                     System.out.println("Started processing " + file.getName());
@@ -88,7 +91,7 @@ public class GalleryScene extends StackPane {
                     progressBar.setMaxWidth(150);
 
                     // Create an ImageView for the image
-                    Image image = convertToFxImage(imageService.scaleImage(Paths.get(file.getAbsolutePath())));
+                    Image image = new Image("file:/" + file.getAbsolutePath(), 150, 150, true, true);
                     ImageView imageView = createImageView(image);
 
                     // Create a VBox to hold the image and progress bar
@@ -107,9 +110,12 @@ public class GalleryScene extends StackPane {
                             }
                         });
                     }, progressBar);
-                    action.execute();
+                    actions.add(action);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
+                }
+                for (Action action : actions) {
+                    action.execute();
                 }
             }
         });

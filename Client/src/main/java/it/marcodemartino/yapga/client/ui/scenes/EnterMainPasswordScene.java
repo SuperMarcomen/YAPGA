@@ -5,10 +5,9 @@ import it.marcodemartino.yapga.client.logic.actions.InputMainPassword;
 import it.marcodemartino.yapga.client.logic.results.Result;
 import it.marcodemartino.yapga.client.logic.results.ResultBroadcaster;
 import it.marcodemartino.yapga.common.services.EncryptionService;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 
 public class EnterMainPasswordScene extends StackPane {
 
@@ -16,16 +15,34 @@ public class EnterMainPasswordScene extends StackPane {
 
     public EnterMainPasswordScene(ResultBroadcaster resultBroadcaster, EncryptionService encryptionService) {
         this.resultBroadcaster = resultBroadcaster;
+        VBox vBox = new VBox();
+
+        Label yapgaLogo = new Label("YAPGA");
+        yapgaLogo.setId("logo");
+
+        Label passwordLabel = new Label("Password");
+        passwordLabel.setId("password_label");
 
         TextField passwordField = new TextField();
+        passwordField.setId("password_input");
+
         Button confirmButton = new Button("Confirm");
+        confirmButton.setId("login_button");
+        confirmButton.prefWidthProperty().bind(vBox.widthProperty());
         confirmButton.setOnMousePressed(event -> {
             Action action = new InputMainPassword(encryptionService, resultBroadcaster, passwordField.getText());
             action.execute();
         });
 
-        VBox vBox = new VBox(passwordField, confirmButton);
-        getChildren().add(vBox);
+        VBox passwordInputContainer = new VBox(passwordLabel, passwordField);
+
+        vBox.getChildren().addAll(yapgaLogo, passwordInputContainer, confirmButton);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setSpacing(100);
+
+        HBox container = new HBox(vBox);
+        container.setAlignment(Pos.CENTER);
+        getChildren().add(container);
 
         resultBroadcaster.registerListener(Result.CORRECT_MAIN_PASSWORD, () -> {
             System.out.println("Password is correct!");

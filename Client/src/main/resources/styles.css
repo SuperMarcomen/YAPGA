@@ -1,0 +1,31 @@
+#logo {
+    -fx-font-family: nexus;
+    -fx-font-size: 80;
+    -fx-font-weight: bold;
+    -fx-stroke-width: 10;
+}
+
+#password_input {
+    -fx-background-color: -fx-text-box-border, -fx-background;
+    -fx-text-box-border: #585858    ;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-background-radius: 0;
+    -fx-font-size: 20;
+}
+
+#password_input:focused {
+    -fx-background-color: -fx-focus-color, -fx-background;
+    -fx-focus-color: #1A1A1A;
+}
+
+#login_button {
+    -fx-background-color: #1A1A1A;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 20;
+}
+
+#password_label {
+    -fx-text-fill: #585858;
+}
+
