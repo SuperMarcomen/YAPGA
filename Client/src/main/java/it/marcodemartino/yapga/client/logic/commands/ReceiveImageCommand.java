@@ -3,6 +3,7 @@ package it.marcodemartino.yapga.client.logic.commands;
 import it.marcodemartino.yapga.client.logic.services.GalleryService;
 import it.marcodemartino.yapga.common.commands.JsonCommand;
 import it.marcodemartino.yapga.common.json.SendImageObject;
+import it.marcodemartino.yapga.common.services.EncryptionService;
 import javafx.application.Platform;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,11 +16,13 @@ public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
     private final Logger logger = LogManager.getLogger(ReceiveImageCommand.class);
     private final InputStream inputStream;
     private final GalleryService galleryService;
+    private final EncryptionService encryptionService;
 
-    public ReceiveImageCommand(InputStream inputStream, GalleryService galleryService) {
+    public ReceiveImageCommand(InputStream inputStream, GalleryService galleryService, EncryptionService encryptionService) {
         super(SendImageObject.class);
         this.inputStream = inputStream;
         this.galleryService = galleryService;
+        this.encryptionService = encryptionService;
     }
 
     @Override
@@ -27,25 +30,32 @@ public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
         logger.info("Received the image {}", sendImageObject.getFileName());
         byte[] pictureBytes = readPictureBytes((int) sendImageObject.getFileSize());
 
-        Platform.runLater(() -> galleryService.addImageFromBytes(pictureBytes));
+        Platform.runLater(() -> {
+                galleryService.addImageFromBytes(encryptionService.decryptBytes(pictureBytes));
+        });
     }
 
     private byte[] readPictureBytes(int fileSize) {
         ByteBuffer buffer = ByteBuffer.allocate(4096); // Adjust buffer size as needed
-        ByteArrayOutputStream pictureData = new ByteArrayOutputStream(fileSize);
+        ByteArrayOutputStream pictureData = new ByteArrayOutputStream();
 
         int bytesRead;
         int totalBytesRead = 0;
 
-        while (totalBytesRead < fileSize) {
-            try {
-                bytesRead = inputStream.read(buffer.array());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        try {
+            while (totalBytesRead < fileSize && (bytesRead = inputStream.read(buffer.array())) != -1) {
+                pictureData.write(buffer.array(), 0, bytesRead);
+                totalBytesRead += bytesRead;
+                buffer.clear();
             }
-            pictureData.write(buffer.array(), 0, bytesRead);
-            totalBytesRead += bytesRead;
-            buffer.clear();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                // Handle error if needed
+            }
         }
 
         return pictureData.toByteArray();

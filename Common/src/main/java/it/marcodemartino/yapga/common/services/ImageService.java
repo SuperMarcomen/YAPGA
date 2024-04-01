@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.*;
+import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -36,7 +37,7 @@ public class ImageService implements ImageResizer, Runnable {
         if (pictures == null || pictures.isEmpty()) return;
         for (Path picture : pictures) {
             try {
-                trySendImage(picture, senderUUID, null);
+                trySendImage(picture, senderUUID, null, false);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -56,25 +57,22 @@ public class ImageService implements ImageResizer, Runnable {
 
     public void sendImage(Path path, UUID senderUUID, Consumer<Double> consumer) {
         try {
-            trySendImage(path, senderUUID, consumer);
+            trySendImage(path, senderUUID, consumer, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void sendImage(Path path, UUID senderUUID) {
-        try {
-            trySendImage(path, senderUUID, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private void trySendImage(Path path, UUID senderUUID, Consumer<Double> consumer, boolean encrypt) throws IOException {
+        FileTime creationTime = (FileTime) Files.getAttribute(path, "creationTime");
+        Path pathToFile = path;
+        if (encrypt) {
+            pathToFile = encryptionService.encryptFile(path);
         }
-    }
-
-    private void trySendImage(Path path, UUID senderUUID, Consumer<Double> consumer) throws IOException {
-        FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ);
+        FileChannel fileChannel = FileChannel.open(pathToFile, StandardOpenOption.READ);
         long fileSize = fileChannel.size();
 
-        JSONObject object = new SendImageObject(path.getFileName().toString(), fileSize, senderUUID);
+        JSONObject object = new SendImageObject(path.getFileName().toString(), creationTime.toMillis(), fileSize, senderUUID);
         outputEmitter.sendOutput(object);
 
         // Send the binary picture data using NIO and a buffer

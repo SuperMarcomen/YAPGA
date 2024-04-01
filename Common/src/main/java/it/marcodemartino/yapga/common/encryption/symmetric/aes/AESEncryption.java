@@ -141,6 +141,16 @@ public class AESEncryption implements SymmetricEncryption {
         return encodedKey + System.lineSeparator() + encodedIV;
     }
 
+    @Override
+    public Cipher getEncryptCipher() {
+        return encryptCipher;
+    }
+
+    @Override
+    public Cipher getDecryptCipher() {
+        return decryptCipher;
+    }
+
     private void initCiphers(IvParameterSpec ivParameterSpec, SecretKey secretKey) {
         try {
             encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);

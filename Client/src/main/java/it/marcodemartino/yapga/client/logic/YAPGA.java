@@ -51,7 +51,7 @@ public class YAPGA {
         commandManager.registerCommand(JSONMethods.SEND_REMOTE_PUBLIC_KEY, new ReceiveRemotePublicKeyCommand(encryptionService));
         commandManager.registerCommand(JSONMethods.ENCRYPTED_MESSAGE, new EncryptedMessageCommand(client.getIO().getEventManager(), encryptionService));
         commandManager.registerCommand(JSONMethods.SEND_IDENTITY_CERTIFICATE, new ReceiveIdentityCertificate(encryptionService, certificatesService));
-        commandManager.registerCommand(JSONMethods.SEND_IMAGE, new ReceiveImageCommand(client.getInputStream(), galleryService));
+        commandManager.registerCommand(JSONMethods.SEND_IMAGE, new ReceiveImageCommand(client.getInputStream(), galleryService, encryptionService));
         client.getIO().registerInputListener(commandManager);
 
         resultBroadcaster.registerListener(Result.CORRECT_MAIN_PASSWORD, authenticationService::login);

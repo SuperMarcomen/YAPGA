@@ -103,7 +103,7 @@ public class GalleryScene extends StackPane {
                     // Add the image and progress bar to the grid
                     Platform.runLater(() -> insertImageInGrid(grid, imageBox, numRows, numCols));
 
-                    Action action = new SendImageAction(outputEmitter, imageService, certificatesService, file.toPath(), progress -> {
+                    Action action = new SendImageAction(imageService, certificatesService, file.toPath(), progress -> {
                         Platform.runLater(() -> {
                             progressBar.setProgress(progress);
                             if (progress == 1.0) {

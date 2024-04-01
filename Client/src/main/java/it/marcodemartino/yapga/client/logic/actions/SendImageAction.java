@@ -1,7 +1,6 @@
 package it.marcodemartino.yapga.client.logic.actions;
 
 import it.marcodemartino.yapga.client.logic.services.CertificatesService;
-import it.marcodemartino.yapga.common.io.emitters.OutputEmitter;
 import it.marcodemartino.yapga.common.services.ImageService;
 import javafx.scene.control.ProgressBar;
 import org.apache.logging.log4j.LogManager;
@@ -13,15 +12,13 @@ import java.util.function.Consumer;
 public class SendImageAction implements Action {
 
     private final Logger logger = LogManager.getLogger(SendImageAction.class);
-    private final OutputEmitter outputEmitter;
     private final ImageService imageService;
     private final CertificatesService certificatesService;
     private final Path path;
     private final Consumer<Double> consumer;
     private final ProgressBar progressBar;
 
-    public SendImageAction(OutputEmitter outputEmitter, ImageService imageService, CertificatesService certificatesService, Path path, Consumer<Double> consumer, ProgressBar progressBar) {
-        this.outputEmitter = outputEmitter;
+    public SendImageAction(ImageService imageService, CertificatesService certificatesService, Path path, Consumer<Double> consumer, ProgressBar progressBar) {
         this.imageService = imageService;
         this.certificatesService = certificatesService;
         this.path = path;

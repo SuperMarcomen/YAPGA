@@ -7,7 +7,13 @@ import it.marcodemartino.yapga.common.encryption.symmetric.*;
 import it.marcodemartino.yapga.common.encryption.symmetric.aes.AESEncryption;
 import it.marcodemartino.yapga.common.json.*;
 
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import java.io.*;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
@@ -29,6 +35,45 @@ public class EncryptionService {
         this.localEncryption = localEncryption;
         this.asymmetricKeyFileHandler = asymmetricKeyFileHandler;
         this.gson = GsonInstance.get();
+    }
+
+    public Path encryptFile(Path input) throws IOException {
+        Path encryptedFile = Files.createTempFile("encrypted-file", null);
+        System.out.println(encryptedFile.toAbsolutePath());
+        File tempFile = encryptedFile.toFile();
+        InputStream inputStream = Files.newInputStream(input);
+
+        try (OutputStream outputStream = new FileOutputStream(tempFile)) {
+            // Create CipherOutputStream to encrypt data as it's being written
+            CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, localEncryption.getEncryptCipher());
+            byte[] buffer = new byte[4096];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                cipherOutputStream.write(buffer, 0, length);
+            }
+            cipherOutputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return encryptedFile;
+    }
+
+
+
+    public void decryptFile(Path output, Path encryptedFile) {
+        try (FileChannel fileChannel = FileChannel.open(encryptedFile, StandardOpenOption.READ);
+             InputStream inputStream2 = Channels.newInputStream(fileChannel);
+             CipherInputStream cipherInputStream = new CipherInputStream(inputStream2, localEncryption.getDecryptCipher());
+             FileOutputStream fileOutputStream = new FileOutputStream(output.toAbsolutePath().toString());
+        ) {
+            byte[] buffer = new byte[4096];
+            int length;
+            while ((length = cipherInputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, length);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean verifyIdentityCertificate(IdentityCertificate identityCertificate) {
@@ -55,6 +100,14 @@ public class EncryptionService {
         String jsonOfObject = gson.toJson(object);
         byte[][] encryptedJson = remoteEncryption.encryptFromString(jsonOfObject);
         return new EncryptedMessageObject(encryptedJson);
+    }
+
+    public byte[] encryptBytes(byte[] toEncrypt) {
+        return localEncryption.encrypt(toEncrypt);
+    }
+
+    public byte[] decryptBytes(byte[] toDecrypt) {
+        return localEncryption.decrypt(toDecrypt);
     }
 
     public boolean inputMainPasswordAndInit(String password) {

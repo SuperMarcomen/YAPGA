@@ -7,8 +7,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.FileTime;
 
 public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
 
@@ -28,7 +28,11 @@ public class ReceiveImageCommand extends JsonCommand<SendImageObject> {
         try {
             String senderUUID = sendImageObject.getSenderUUID().toString();
             Files.createDirectories(Paths.get(senderUUID));
-            Files.write(Paths.get(senderUUID, sendImageObject.getFileName()), pictureBytes);
+            Path path = Paths.get(senderUUID, sendImageObject.getFileName());
+            Files.write(path, pictureBytes);
+
+            FileTime time = FileTime.fromMillis(sendImageObject.getMillisCreationDate());
+            Files.setAttribute(path, "creationTime", time);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
